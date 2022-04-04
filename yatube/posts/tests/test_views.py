@@ -1,4 +1,3 @@
-from tokenize import group
 from django import forms
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
@@ -21,7 +20,7 @@ class PostsPagesTest(TestCase):
             description='Тестовое описание',
         )
         cls.post = Post.objects.create(
-            author = cls.user,
+            author=cls.user,
             text='Текстовая пост',
             group=cls.group
         )
@@ -44,7 +43,7 @@ class PostsPagesTest(TestCase):
         self.assertEqual(post.text, self.post.text)
         self.assertEqual(post.group, self.post.group)
         self.assertEqual(post.author, self.post.author)
-    
+
     # Проверка 1: view-классы используют ожидаемые HTML-шаблоны
 
     def templates_pages_names(self):
@@ -52,23 +51,23 @@ class PostsPagesTest(TestCase):
         templates_pages_name = {
             'posts/index.html': reverse('posts:index'),
             'posts/group_list.html': (
-                reverse('posts:posts_slug', kwargs={'slug': f'{self.group.slug}'})
+                reverse('posts:posts_slug', kwargs={'slug': self.group.slug})
             ),
             'posts/profile.html': (
-                reverse('posts:profile', kwargs={'username': f'{self.user}'})
+                reverse('posts:profile', kwargs={'username': self.user})
             ),
             'posts/post_detail.html': (
-                reverse('posts:post_detail', kwargs={'post_id': f'{self.post.pk}'})
+                reverse('posts:post_detail', kwargs={'post_id': self.post.pk})
             ),
             'posts/create_post.html': reverse('posts:post_create'),
             'posts/create_post.html': (
-                reverse('posts:post_edit', kwargs={'post_id': f'{self.post.pk}'})
+                reverse('posts:post_edit', kwargs={'post_id': self.post.pk})
             )
         }
         for template, reverse_name in templates_pages_name.items():
             with self.subTest(reverse_name=reverse_name):
                 response = self.authorized_client.get(reverse_name)
-                self.assertTemplateUsed(response, template) 
+                self.assertTemplateUsed(response, template)
 
     # Проверка 2: в шаблон передан правильный контекст
     def test_show_correct_context(self):
@@ -96,7 +95,7 @@ class PostsPagesTest(TestCase):
             'text': forms.fields.CharField,
             'group': forms.fields.ChoiceField,
         }
-        
+
         for field, expected_value in form_fields.items():
             with self.subTest(field=field):
                 form_field = response.context.get('form').fields.get(field)
@@ -108,7 +107,7 @@ class PostsPagesTest(TestCase):
             'text': forms.fields.CharField,
             'group': forms.fields.ChoiceField,
         }
-        
+
         for field, expected_value in form_fields.items():
             with self.subTest(field=field):
                 form_field = response.context.get('form').fields.get(field)
@@ -117,7 +116,7 @@ class PostsPagesTest(TestCase):
     def test_create_post_group_show(self):
         """
         Проверяем, что, указывая группу при создании поста,
-        пост появится на главной странице, странице 
+        пост появится на главной странице, странице
         выбранной группы и в профайле пользователя.
         """
         url_list = [
@@ -141,7 +140,7 @@ class PostsPagesTest(TestCase):
             self.post,
             self.authorized_client.get(
                 reverse(
-                    'posts:posts_slug', 
+                    'posts:posts_slug',
                     args=[self.group_2.slug])).context['page_obj']
         )
 
@@ -152,9 +151,9 @@ class PostsPagesTest(TestCase):
             # Создадим запись в БД
             cls.user = User.objects.create_user(username='Roman')
             cls.group = Group.objects.create(
-            title='Тестовая группа',
-            slug='test-slug',
-            description='Тестовое описание',
+                title='Тестовая группа',
+                slug='test-slug',
+                description='Тестовое описание',
             )
             cls.post = (
                 Post.objects.create(
@@ -191,5 +190,3 @@ class PostsPagesTest(TestCase):
                     self.assertEqual(
                         len(response.context['page_obj'], 3)
                     )
-                
- 

@@ -19,7 +19,7 @@ class PostURLTests(TestCase):
             description='Тестовое описание',
         )
         cls.post = Post.objects.create(
-            author = cls.user,
+            author=cls.user,
             text='Текстовая пост',
         )
 
@@ -32,7 +32,7 @@ class PostURLTests(TestCase):
         self.authorized_client.force_login(self.user)
 
     # Проверяем доступность страниц для неавторизированного пользователя
-    
+
     def test_url_at_desired_location_for_any_user(self):
         """ Проверка доступности адресов страниц для любого пользователя"""
         urls_names = {

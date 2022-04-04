@@ -21,7 +21,6 @@ class PostModelTest(TestCase):
             text='Текстовая пост',
         )
 
-
     def test_models_have_correct_object_names(self):
         '''Проверяем, что у моделей корректно работает __str__.'''
         # Проверяем правильное отображение значение поля __str__ в post
@@ -30,4 +29,3 @@ class PostModelTest(TestCase):
         # Проверяем правильное отображение значения поля __str__ в group
         group = PostModelTest.group
         self.assertEqual(str(group.title), group.title)
-

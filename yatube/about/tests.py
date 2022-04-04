@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from django.test import TestCase, Client
 
+
 class StaticPagesURLTests(TestCase):
     def setUp(self):
         self.guest_client = Client()
@@ -11,7 +12,6 @@ class StaticPagesURLTests(TestCase):
         """Проверка доступности адреса /about/."""
         response = self.guest_client.get('/about/author/')
         self.assertEqual(response.status_code, 200)
-
 
     def test_tech_url_exists_at_desired_location(self):
         """Проверка доступности адреса /tech/."""
@@ -27,12 +27,10 @@ class StaticPagesURLTests(TestCase):
         # Шаблоны по адресам
         template_url_names = {
             '/about/author/': 'about/about.html',
-            '/about/tech/':  'about/tech.html',
+            '/about/tech/': 'about/tech.html',
         }
 
         for address, template in template_url_names.items():
             with self.subTest(address=address):
                 response = self.guest_client.get(address)
                 self.assertTemplateUsed(response, template)
-
-    
