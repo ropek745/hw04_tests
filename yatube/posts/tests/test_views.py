@@ -86,9 +86,8 @@ class PostsPagesTest(TestCase):
 
     def test_detail_page_show_correct(self):
         response = self.authorized_client.get(
-            reverse('posts:post_detail',
-            args=[self.post.pk]
-            )
+            reverse(
+                'posts:post_detail', args=[self.post.pk])
         )
         post = response.context['post']
         self.check_post_context(post)
@@ -107,9 +106,8 @@ class PostsPagesTest(TestCase):
 
     def test_edit_post_show_correct_context(self):
         response = self.authorized_client.get(
-            reverse('posts:post_edit',
-            args=[self.post.pk]
-            )
+            reverse(
+                'posts:post_edit', args=[self.post.pk])
         )
         form_fields = {
             'text': forms.fields.CharField,
