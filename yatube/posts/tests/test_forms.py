@@ -45,7 +45,7 @@ class PostCreateFormTests(TestCase):
             follow=True
         )
         self.assertRedirects(
-            response, 
+            response,
             reverse('posts:profile', args=[self.user])
         )
         # Проверяем, увеличилось ли число постов

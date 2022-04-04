@@ -49,20 +49,20 @@ class PostsPagesTest(TestCase):
     def templates_pages_names(self):
         """URL-адрес использует соответствующий шаблон."""
         templates_pages_name = {
-            'posts/index.html': reverse('posts:index'),
-            'posts/group_list.html': (
-                reverse('posts:posts_slug', kwargs={'slug': self.group.slug})
-            ),
-            'posts/profile.html': (
-                reverse('posts:profile', kwargs={'username': self.user})
-            ),
-            'posts/post_detail.html': (
-                reverse('posts:post_detail', kwargs={'post_id': self.post.pk})
-            ),
-            'posts/create_post.html': reverse('posts:post_create'),
-            'posts/create_post.html': (
-                reverse('posts:post_edit', kwargs={'post_id': self.post.pk})
-            )
+            reverse('posts:index'): 'posts/index.html',
+            reverse(
+                'posts:posts_slug', kwargs={'slug': self.group.slug}
+            ): 'posts/group_list.html',
+            reverse(
+                'posts:profile', kwargs={'username': self.user}
+            ): 'posts/profile.html',
+            reverse(
+                'posts:post_detail', kwargs={'post_id': self.post.pk}
+            ): 'posts/post_detail.html',
+            reverse('posts:post_create'): 'posts/create_post.html',
+            reverse(
+                'posts:post_edit', kwargs={'post_id': self.post.pk}
+            ): 'posts/create_post.html',
         }
         for template, reverse_name in templates_pages_name.items():
             with self.subTest(reverse_name=reverse_name):
@@ -85,7 +85,11 @@ class PostsPagesTest(TestCase):
                 self.check_post_context(post)
 
     def test_detail_page_show_correct(self):
-        response = self.authorized_client.get(reverse('posts:post_detail', args=[self.post.pk]))
+        response = self.authorized_client.get(
+            reverse('posts:post_detail',
+            args=[self.post.pk]
+            )
+        )
         post = response.context['post']
         self.check_post_context(post)
 
@@ -102,7 +106,11 @@ class PostsPagesTest(TestCase):
                 self.assertIsInstance(form_field, expected_value)
 
     def test_edit_post_show_correct_context(self):
-        response = self.authorized_client.get(reverse('posts:post_edit', args=[self.post.pk]))
+        response = self.authorized_client.get(
+            reverse('posts:post_edit',
+            args=[self.post.pk]
+            )
+        )
         form_fields = {
             'text': forms.fields.CharField,
             'group': forms.fields.ChoiceField,
