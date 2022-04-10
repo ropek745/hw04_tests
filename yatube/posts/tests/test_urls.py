@@ -9,6 +9,10 @@ INDEX_URL = reverse('posts:index')
 CREATE_URL = reverse('posts:post_create')
 LOGIN = reverse('users:login')
 
+OK = HTTPStatus.OK
+FAILED = HTTPStatus.NOT_FOUND
+REDIRECT = HTTPStatus.FOUND
+
 USERNAME = 'Roman'
 USERNAME_1 = 'Pekarev'
 GROUP_TITLE = 'Тестовая группа'
@@ -47,28 +51,29 @@ class PostURLTests(TestCase):
         cls.EDIT_REDIRECT = f'{LOGIN}?next={cls.POST_EDIT}'
 
     def setUp(self):
-        self.guest_client = Client()
-        self.authorized_client = Client()
+        self.guest = Client()
+        self.another = Client()
+        self.author = Client()
         self.authorized_client_new = Client()
-        self.authorized_client.force_login(self.user)
+        self.author.force_login(self.user)
         self.authorized_client_new.force_login(self.new_user)
 
     def test_url_at_desired_location_for_any_user(self):
         """Проверка доступности адресов страниц для любого пользователя"""
         urls_names = [
-            [INDEX_URL, self.guest_client, HTTPStatus.OK],
-            [CREATE_URL, self.guest_client, HTTPStatus.FOUND],
-            [GROUP_LIST_URL, self.guest_client, HTTPStatus.OK],
-            [PROFILE_URL, self.guest_client, HTTPStatus.OK],
-            [self.POST_DETAIL, self.guest_client, HTTPStatus.OK],
-            [self.POST_EDIT, self.guest_client, HTTPStatus.FOUND],
-            [CREATE_URL, self.authorized_client, HTTPStatus.OK],
-            [self.POST_EDIT, self.authorized_client, HTTPStatus.OK],
-            [self.POST_EDIT, self.guest_client, HTTPStatus.FOUND],
-            [NOT_FOUND_ULR, self.guest_client, HTTPStatus.NOT_FOUND]
+            [INDEX_URL, self.guest, OK],
+            [CREATE_URL, self.another, REDIRECT],
+            [GROUP_LIST_URL, self.guest, OK],
+            [PROFILE_URL, self.guest, OK],
+            [self.POST_DETAIL, self.guest, OK],
+            [self.POST_EDIT, self.another, REDIRECT],
+            [CREATE_URL, self.author, OK],
+            [self.POST_EDIT, self.author, OK],
+            [self.POST_EDIT, self.another, REDIRECT],
+            [NOT_FOUND_ULR, self.guest, FAILED]
         ]
         for url, client, status in urls_names:
-            with self.subTest(url=url):
+            with self.subTest(url=url, status=status):
                 self.assertEqual(client.get(url).status_code, status)
 
     def url_redirect_anonymous_on_admin_login(self):
@@ -77,8 +82,8 @@ class PostURLTests(TestCase):
         пользователя на страницу логина.
         """
         urls_redirect_list = [
-            [CREATE_URL, self.guest_client, CREATE_REDIRECT],
-            [self.POST_EDIT, self.guest_client, self.EDIT_REDIRECT]
+            [CREATE_URL, self.guest, CREATE_REDIRECT],
+            [self.POST_EDIT, self.guest, self.EDIT_REDIRECT]
             [self.POST_EDIT, self.authorized_client_new, self.POST_DETAIL]
         ]
         for url, client, redirect in urls_redirect_list:
@@ -88,12 +93,12 @@ class PostURLTests(TestCase):
     def test_url_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
         template_url_names = [
-            [INDEX_URL, self.guest_client, 'posts/index.html'],
-            [CREATE_URL, self.authorized_client, 'posts/create_post.html'],
-            [GROUP_LIST_URL, self.authorized_client, 'posts/group_list.html'],
-            [PROFILE_URL, self.guest_client, 'posts/profile.html'],
-            [self.POST_DETAIL, self.guest_client, 'posts/post_detail.html'],
-            [self.POST_EDIT, self.authorized_client, 'posts/create_post.html']
+            [INDEX_URL, self.guest, 'posts/index.html'],
+            [CREATE_URL, self.author, 'posts/create_post.html'],
+            [GROUP_LIST_URL, self.author, 'posts/group_list.html'],
+            [PROFILE_URL, self.guest, 'posts/profile.html'],
+            [self.POST_DETAIL, self.guest, 'posts/post_detail.html'],
+            [self.POST_EDIT, self.author, 'posts/create_post.html']
         ]
         for url, client, template in template_url_names:
             with self.subTest(url=url):

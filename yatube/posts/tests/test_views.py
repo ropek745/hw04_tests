@@ -80,6 +80,9 @@ class PostsPagesTest(TestCase):
     def test_group_list_show_correct_context(self):
         response = self.authorized_client.get(GROUP_LIST_URL)
         self.assertEqual(self.group, response.context['group'])
+        self.assertEqual(self.group.title, GROUP_TITLE)
+        self.assertEqual(self.group.slug, GROUP_SLUG)
+        self.assertEqual(self.group.description, GROUP_DESCRIPTION)
 
     def test_new_post_in_another_group(self):
         """Наличие поста в другой группе"""
