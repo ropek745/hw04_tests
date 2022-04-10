@@ -18,5 +18,5 @@ class TestRoutes(TestCase):
         ]
         for url, route, args in routes:
             with self.subTest(url=url, route=route, args=args):
-                    result = reverse(f'posts:{route}', args=args)
-                    self.assertEqual(url, result)
+                result = reverse(f'posts:{route}', args=args)
+                self.assertEqual(url, result)

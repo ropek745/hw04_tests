@@ -1,6 +1,7 @@
-from django import forms
 from django.test import Client, TestCase
 from django.urls import reverse
+
+from yatube.posts.tests.test_urls import PROFILE_URL
 
 from ..models import Group, Post, User
 
@@ -11,15 +12,15 @@ GROUP_DESCRIPTION = 'Тестовое описание'
 GROUP_TITLE_NEW = 'Новая тестовая группа'
 GROUP_SLUG_NEW = 'test-slug-new'
 GROUP_DESCRIPTION_NEW = 'Новое тестовое описание'
-
+USERNAME = 'Roman'
 
 
 CREATE_URL = reverse('posts:post_create')
+PROFILE_URL = reverse('posts:profile', args=[USERNAME])
 
 POST_TEXT = 'Текстовая пост'
 NEW_POST_TEXT = 'Новый текст'
 
-USERNAME = 'Roman'
 
 class PostCreateFormTests(TestCase):
     @classmethod
@@ -45,7 +46,6 @@ class PostCreateFormTests(TestCase):
         cls.POST_EDIT_URL = reverse('posts:post_edit', args=[cls.post.id])
         cls.PROFILE_URL = reverse('posts:profile', args=[cls.user])
 
-
     def setUp(self):
         # Создаем неавторизованный клиент
         self.authorized_client = Client()
@@ -54,7 +54,6 @@ class PostCreateFormTests(TestCase):
 
     def test_post_create(self):
         Post.objects.all().delete
-        posts_count = Post.objects.count()
         form_data = {
             'text': POST_TEXT,
             'group': self.group
@@ -66,7 +65,8 @@ class PostCreateFormTests(TestCase):
         )
         post = Post.objects.get()
         self.assertEqual(post.text, form_data['text'])
-        self.assertEqual(Post.objects.count(), posts_count)
+        self.assertRedirects(response, PROFILE_URL)
+        self.assertEqual(Post.objects.count(), 1)
 
     def test_post_edit(self):
         # Создаём форму
@@ -84,4 +84,3 @@ class PostCreateFormTests(TestCase):
         self.assertEqual(post.group.id, form_data['group'])
         self.assertEqual(post.author, self.post.author)
         self.assertRedirects(response, self.POST_DETAIL_URL)
-        

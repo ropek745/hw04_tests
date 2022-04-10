@@ -16,7 +16,7 @@ USERNAME = 'Roma'
 INDEX_URL = reverse('posts:index')
 GROUP_LIST_URL = reverse('posts:posts_slug', args=[GROUP_SLUG])
 PROFILE_URL = reverse('posts:profile', args=[USERNAME])
-        
+
 
 class PostsPagesTest(TestCase):
     @classmethod
@@ -78,7 +78,7 @@ class PostsPagesTest(TestCase):
                 'posts:post_detail', args=[self.post.pk])
         )
         post = response.context['post']
-        self.check_post_context(post)   
+        self.check_post_context(post)
 
     def test_new_post_in_another_group(self):
         """Наличие поста в другой группе"""
@@ -102,13 +102,10 @@ class PostsPagesTest(TestCase):
                 description='Тестовое описание',
             )
             for i in range(1, 14):
-                Post.objects.bulk_create(
-                    [Post(
-                        text=POST_TEXT,
-                        author=cls.user,
-                        group=cls.group)
-                    ]
-                )
+                Post.objects.bulk_create([Post(
+                    text=POST_TEXT,
+                    author=cls.user,
+                    group=cls.group)])
 
         def setUp(self) -> None:
             # Создаем авторизированный клиент клиент
