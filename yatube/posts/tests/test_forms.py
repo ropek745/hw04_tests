@@ -1,8 +1,6 @@
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from yatube.posts.tests.test_urls import PROFILE_URL
-
 from ..models import Group, Post, User
 
 GROUP_TITLE = 'Тестовая группа'
