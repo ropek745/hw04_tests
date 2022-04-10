@@ -62,6 +62,8 @@ class PostCreateFormTests(TestCase):
         )
         post = Post.objects.get()
         self.assertEqual(post.text, form_data['text'])
+        self.assertEqual(post.author, self.user)
+        self.assertEqual(post.group.id, form_data['group'])
         self.assertRedirects(response, PROFILE_URL)
         self.assertEqual(Post.objects.count(), 1)
 

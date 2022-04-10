@@ -15,7 +15,6 @@ GROUP_TITLE = 'Тестовая группа'
 GROUP_SLUG = 'test-slug'
 GROUP_DESCRIPTION = 'Тестовое описание'
 POST_TEXT = 'I love django tests'
-POST_ID = 6
 
 GROUP_LIST_URL = reverse('posts:posts_slug', kwargs={'slug': GROUP_SLUG})
 PROFILE_URL = reverse('posts:profile', kwargs={'username': USERNAME})
@@ -38,7 +37,6 @@ class PostURLTests(TestCase):
         cls.post = Post.objects.create(
             author=cls.user,
             text=POST_TEXT,
-            pk=POST_ID
         )
         cls.POST_DETAIL = reverse(
             'posts:post_detail', kwargs={'post_id': cls.post.id}
@@ -55,25 +53,23 @@ class PostURLTests(TestCase):
         self.authorized_client.force_login(self.user)
         self.authorized_client_new.force_login(self.new_user)
 
-    # Проверяем доступность страниц для неавторизированного пользователя
-
     def test_url_at_desired_location_for_any_user(self):
         """Проверка доступности адресов страниц для любого пользователя"""
-        urls_names = {
-            INDEX_URL: HTTPStatus.OK,
-            GROUP_LIST_URL: HTTPStatus.OK,
-            PROFILE_URL: HTTPStatus.OK,
-            self.POST_DETAIL: HTTPStatus.OK,
-            NOT_FOUND_ULR: HTTPStatus.NOT_FOUND,
-            self.POST_EDIT: HTTPStatus.OK,
-            CREATE_URL: HTTPStatus.OK,
-        }
-        for address, code_status in urls_names.items():
-            with self.subTest(address=address):
-                self.assertEqual(
-                    self.authorized_client.get(address).status_code,
-                    code_status
-                )
+        urls_names = [
+            [INDEX_URL, self.guest_client, HTTPStatus.OK],
+            [CREATE_URL, self.guest_client, HTTPStatus.FOUND],
+            [GROUP_LIST_URL, self.guest_client, HTTPStatus.OK],
+            [PROFILE_URL, self.guest_client, HTTPStatus.OK],
+            [self.POST_DETAIL, self.guest_client, HTTPStatus.OK],
+            [self.POST_EDIT, self.guest_client, HTTPStatus.FOUND],
+            [CREATE_URL, self.authorized_client, HTTPStatus.OK],
+            [self.POST_EDIT, self.authorized_client, HTTPStatus.OK],
+            [self.POST_EDIT, self.guest_client, HTTPStatus.FOUND],
+            [NOT_FOUND_ULR, self.guest_client, HTTPStatus.NOT_FOUND]
+        ]
+        for url, client, status in urls_names:
+            with self.subTest(url=url):
+                self.assertEqual(client.get(url).status_code, status)
 
     def url_redirect_anonymous_on_admin_login(self):
         """
@@ -86,10 +82,8 @@ class PostURLTests(TestCase):
             [self.POST_EDIT, self.authorized_client_new, self.POST_DETAIL]
         ]
         for url, client, redirect in urls_redirect_list:
-            with self.subTest(url=url):
+            with self.subTest(url=url, redirect=redirect):
                 self.assertRedirects(client.get(url, follow=True), redirect)
-
-    # Проверка вызываемых шаблонов
 
     def test_url_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""

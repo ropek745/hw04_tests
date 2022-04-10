@@ -1,6 +1,6 @@
 from django.core.paginator import Paginator
 
-PAGINATOR_COUNT = 10
+from yatube.settings import PAGINATOR_COUNT
 
 
 def paginator_page(request, queryset):

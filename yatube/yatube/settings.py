@@ -19,8 +19,7 @@ ALLOWED_HOSTS = [
     'testserver',
 ]
 
-AMOUNT_PAGES = 10
-OTHER_PAGES = 3
+PAGINATOR_COUNT = 10
 
 # Application definition
 
