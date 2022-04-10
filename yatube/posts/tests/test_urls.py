@@ -40,14 +40,13 @@ class PostURLTests(TestCase):
             text=POST_TEXT,
             pk=POST_ID
         )
-        cls.POST_DETAIL_URL = reverse(
+        cls.POST_DETAIL = reverse(
             'posts:post_detail', kwargs={'post_id': cls.post.id}
         )
-        cls.POST_EDIT_URL = reverse(
+        cls.POST_EDIT = reverse(
             'posts:post_edit', kwargs={'post_id': cls.post.id}
         )
-        cls.EDIT_REDIRECT = f'{LOGIN}?next={cls.POST_EDIT_URL}'
-
+        cls.EDIT_REDIRECT = f'{LOGIN}?next={cls.POST_EDIT}'
 
     def setUp(self):
         self.guest_client = Client()
@@ -64,9 +63,9 @@ class PostURLTests(TestCase):
             INDEX_URL: HTTPStatus.OK,
             GROUP_LIST_URL: HTTPStatus.OK,
             PROFILE_URL: HTTPStatus.OK,
-            self.POST_DETAIL_URL: HTTPStatus.OK,
+            self.POST_DETAIL: HTTPStatus.OK,
             NOT_FOUND_ULR: HTTPStatus.NOT_FOUND,
-            self.POST_EDIT_URL: HTTPStatus.OK,
+            self.POST_EDIT: HTTPStatus.OK,
             CREATE_URL: HTTPStatus.OK,
         }
         for address, code_status in urls_names.items():
@@ -83,8 +82,8 @@ class PostURLTests(TestCase):
         """
         urls_redirect_list = [
             [CREATE_URL, self.guest_client, CREATE_REDIRECT],
-            [self.POST_EDIT_URL, self.guest_client, self.EDIT_REDIRECT]
-            [self.POST_EDIT_URL, self.authorized_client_new, self.POST_DETAIL_URL]
+            [self.POST_EDIT, self.guest_client, self.EDIT_REDIRECT]
+            [self.POST_EDIT, self.authorized_client_new, self.POST_DETAIL]
         ]
         for url, client, redirect in urls_redirect_list:
             with self.subTest(url=url):
@@ -99,8 +98,8 @@ class PostURLTests(TestCase):
             [CREATE_URL, self.authorized_client, 'posts/create_post.html'],
             [GROUP_LIST_URL, self.authorized_client, 'posts/group_list.html'],
             [PROFILE_URL, self.guest_client, 'posts/profile.html'],
-            [self.POST_DETAIL_URL, self.guest_client, 'posts/post_detail.html'],
-            [self.POST_EDIT_URL, self.authorized_client, 'posts/create_post.html']
+            [self.POST_DETAIL, self.guest_client, 'posts/post_detail.html'],
+            [self.POST_EDIT, self.authorized_client, 'posts/create_post.html']
         ]
         for url, client, template in template_url_names:
             with self.subTest(url=url):
