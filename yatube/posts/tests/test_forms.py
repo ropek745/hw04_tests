@@ -1,3 +1,4 @@
+from django import forms
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -42,7 +43,6 @@ class PostCreateFormTests(TestCase):
         )
         cls.POST_DETAIL_URL = reverse('posts:post_detail', args=[cls.post.id])
         cls.POST_EDIT_URL = reverse('posts:post_edit', args=[cls.post.id])
-        cls.PROFILE_URL = reverse('posts:profile', args=[cls.user])
 
     def setUp(self):
         # Создаем неавторизованный клиент
@@ -51,15 +51,14 @@ class PostCreateFormTests(TestCase):
         self.authorized_client.force_login(self.user)
 
     def test_post_create(self):
-        Post.objects.all().delete
+        Post.objects.all().delete()
         form_data = {
             'text': POST_TEXT,
-            'group': self.group
+            'group': self.group.id
         }
         response = self.authorized_client.post(
             CREATE_URL,
             data=form_data,
-            follow=True
         )
         post = Post.objects.get()
         self.assertEqual(post.text, form_data['text'])
@@ -82,3 +81,19 @@ class PostCreateFormTests(TestCase):
         self.assertEqual(post.group.id, form_data['group'])
         self.assertEqual(post.author, self.post.author)
         self.assertRedirects(response, self.POST_DETAIL_URL)
+
+    def test_form_create_and_edit_post_is_valid(self):
+        urls = [
+            CREATE_URL,
+            self.POST_EDIT_URL
+        ]
+        form_fields = {
+            'text': forms.fields.CharField,
+            'group': forms.fields.ChoiceField
+        }
+        for url in urls:
+            response = self.authorized_client.get(url)
+            for value, expected_value in form_fields.items():
+                with self.subTest(value=value):
+                    form_field = response.context.get('form').fields.get(value)
+                    self.assertIsInstance(form_field, expected_value)
