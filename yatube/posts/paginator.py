@@ -1,6 +1,7 @@
 from django.core.paginator import Paginator
 
+PAGINATOR_COUNT = 10
 
 def paginator_page(request, queryset):
     return Paginator(
-        queryset, 10).get_page(request.GET.get('page'))
+        queryset, PAGINATOR_COUNT).get_page(request.GET.get('page'))
