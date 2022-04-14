@@ -48,7 +48,11 @@ class PostURLTests(TestCase):
         cls.POST_EDIT = reverse(
             'posts:post_edit', kwargs={'post_id': cls.post.id}
         )
+        cls.COMMENT = reverse(
+            'posts:add_comment', kwargs={'post_id': cls.post.id}
+        )
         cls.EDIT_REDIRECT = f'{LOGIN}?next={cls.POST_EDIT}'
+        cls.COMMENT_REDIRECT = f'{LOGIN}?next={cls.POST_EDIT}comment/'
 
     def setUp(self):
         self.guest = Client()
@@ -59,7 +63,7 @@ class PostURLTests(TestCase):
         self.authorized_client_new.force_login(self.new_user)
 
     def test_url_at_desired_location_for_any_user(self):
-        """Проверка доступности адресов страниц для любого пользователя"""
+        """Проверка доступности адресов страниц для пользователя"""
         urls_names = [
             [INDEX_URL, self.guest, OK],
             [CREATE_URL, self.another, REDIRECT],
@@ -70,7 +74,9 @@ class PostURLTests(TestCase):
             [CREATE_URL, self.author, OK],
             [self.POST_EDIT, self.author, OK],
             [self.POST_EDIT, self.another, REDIRECT],
-            [NOT_FOUND_ULR, self.guest, FAILED]
+            [NOT_FOUND_ULR, self.guest, FAILED],
+            [self.COMMENT, self.guest, REDIRECT],
+            [self.COMMENT, self.author, REDIRECT]
         ]
         for url, client, status in urls_names:
             with self.subTest(url=url, status=status):
@@ -83,8 +89,9 @@ class PostURLTests(TestCase):
         """
         urls_redirect_list = [
             [CREATE_URL, self.guest, CREATE_REDIRECT],
-            [self.POST_EDIT, self.guest, self.EDIT_REDIRECT]
-            [self.POST_EDIT, self.authorized_client_new, self.POST_DETAIL]
+            [self.POST_EDIT, self.guest, self.EDIT_REDIRECT],
+            [self.POST_EDIT, self.authorized_client_new, self.POST_DETAIL],
+            [self.COMMENT, self.guest, self.COMMENT_REDIRECT]
         ]
         for url, client, redirect in urls_redirect_list:
             with self.subTest(url=url, redirect=redirect):

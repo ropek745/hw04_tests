@@ -12,6 +12,12 @@ SECRET_KEY = '4fr7zddy!wgw-usj7k4tx(jq6!fb2fim15=f5=fstja7!s^ra@'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
@@ -20,6 +26,8 @@ ALLOWED_HOSTS = [
 ]
 
 PAGINATOR_COUNT = 10
+
+CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
 
 # Application definition
 
@@ -35,6 +43,7 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'about.apps.AboutConfig',
     'posts.apps.PostsConfig',
+    'sorl.thumbnail'
 ]
 
 MIDDLEWARE = [
@@ -128,3 +137,7 @@ LOGIN_REDIRECT_URL = 'posts:index'
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
 EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

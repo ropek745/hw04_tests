@@ -1,8 +1,14 @@
+import shutil
+import tempfile
+
 from django import forms
-from django.test import Client, TestCase
+from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from ..models import Group, Post, User
+from ..models import Group, Post, User, Comment
+
 
 GROUP_TITLE = 'Тестовая группа'
 GROUP_SLUG = 'test-slug'
@@ -13,6 +19,7 @@ GROUP_SLUG_NEW = 'test-slug-new'
 GROUP_DESCRIPTION_NEW = 'Новое тестовое описание'
 USERNAME = 'Roman'
 
+COMMENT_TEXT = 'Текст комментария'
 
 CREATE_URL = reverse('posts:post_create')
 PROFILE_URL = reverse('posts:profile', args=[USERNAME])
@@ -20,7 +27,10 @@ PROFILE_URL = reverse('posts:profile', args=[USERNAME])
 POST_TEXT = 'Текстовая пост'
 NEW_POST_TEXT = 'Новый текст'
 
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
+
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostCreateFormTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -41,6 +51,14 @@ class PostCreateFormTests(TestCase):
             text=POST_TEXT,
             group=cls.group
         )
+        cls.comment = Comment.objects.create(
+            author=cls.user,
+            text=COMMENT_TEXT,
+            post=cls.post
+        )
+        cls.COMMENT = reverse(
+            'posts:add_comment', kwargs={'post_id': cls.post.id}
+        )
         cls.POST_DETAIL_URL = reverse('posts:post_detail', args=[cls.post.id])
         cls.POST_EDIT_URL = reverse('posts:post_edit', args=[cls.post.id])
 
@@ -50,11 +68,30 @@ class PostCreateFormTests(TestCase):
         # Авторизуем клиента
         self.authorized_client.force_login(self.user)
 
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
+
     def test_post_create(self):
         Post.objects.all().delete()
+        small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=small_gif,
+            content_type='image/gif'
+        )
         form_data = {
             'text': POST_TEXT,
-            'group': self.group.id
+            'group': self.group.id,
+            'image': uploaded
         }
         response = self.authorized_client.post(
             CREATE_URL,
@@ -66,6 +103,12 @@ class PostCreateFormTests(TestCase):
         self.assertEqual(post.group.id, form_data['group'])
         self.assertRedirects(response, PROFILE_URL)
         self.assertEqual(Post.objects.count(), 1)
+        self.assertTrue(
+            Post.objects.filter(
+                group=self.group.id,
+                text=POST_TEXT,
+                image='posts/small.gif'
+            ).exists())
 
     def test_post_edit(self):
         # Создаём форму

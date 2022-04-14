@@ -5,7 +5,10 @@
 {% endblock %}
 
 {% block content %}
+{% load cache %}
+{% load thumbnail %}
   <div class='container py-5'>
+  {% cache 20 index_page %}
   <h1>Главная страница</h1>
   <h4>Последние записи пользователей</h4>
   {% for post in page_obj %}
@@ -19,6 +22,9 @@
         Дата публикации: {{ post.pub_date|date:"d E Y" }}
       </li>
     </ul>
+    {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
+      <img class="card-img my-2" src="{{ im.url }}">
+    {% endthumbnail %}
     <p>{{ post.text|linebreaksbr }}</p>
     {% if post.group %}   
       Группа: <a href="{% url 'posts:posts_slug' post.group.slug %}">{{ post.group }}</a>
@@ -26,5 +32,6 @@
     {% if not forloop.last %}<hr>{% endif %}
   {% endfor %}
   {% include 'posts/includes/paginator.html' %}
+  {% endcache %} 
 
 {% endblock %}
